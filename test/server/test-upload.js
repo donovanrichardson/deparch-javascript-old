@@ -1,5 +1,6 @@
 const Az = require('adm-zip');
 var expect  = require('chai').expect;
+var assert  = require('chai').assert;
 const env = 'development';
 const config = require('../../knexfile.js')[env];
 const knex = require('knex')(config);
@@ -51,14 +52,15 @@ describe("scope", async () => {
     it('does the thing', async() =>{
 
     const nunya = async () =>{
-        return await knex('feed').insert({id: 'exam', title:'Example Fuid', location:0, latest:'nunyabeezwax'},'*').rows
+        return await knex('feed').insert({id: 'exam', title:'Example Fuid', location:0, latest:'nunyabeezwax'},/*returning =>*/'*').rows
     }
 
     try {
         const bees = await nunya();
-        expect(typeof(bees)).to.equal('');
+        return expect(typeof(bees)).to.equal('');
     }catch (e){
         console.error(e);
+        return assert.fail(e);
     }
 
     // console.log(knex('feed').insert({id: 'exam', title:'Example Fuid', location:0, latest:'nunyabeezwax'},'*'));
