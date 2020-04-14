@@ -32,36 +32,67 @@ let omd = "https://openmobilitydata.org/p/mta/86/20200406/download"
 //     })
 //     console.log(Object.keys(forImport))
 //   })
-var dict = []
+var dict = {}
 
 const giveNum = function(num){
     console.log(4+num)
     dict.push(num)
 }
 
-axios.get(omd, {responseType: 'arraybuffer'}).then(res =>{
-    // console.log(res.data)
-    return new Az(res.data);
-}).then( (zip) =>{
-     zip.getEntries().forEach( async (ent) =>{
-        var results = await neatCsv(zip.readAsText(ent))
-        // Readable.from(zip.readAsText(ent))
-        // .pipe(csv())
-        // .on('data', (data) => results.push(data))
-        // .on('end', () => {
-        //     console.log(`${ent.entryName} added`)
-        // });
-        // console.log(results)
-        // console.log("above are results")
-        // dict[ent.entryName] = 1;
-        dict.push(1)
+async function ziptojson(){
+    await axios.get(omd, {responseType: 'arraybuffer'}).then((res) =>{
+        // console.log(res.data)
+        return new Az(res.data);
+    }).then( (zip) =>{
+         zip.getEntries().forEach( async (ent) =>{
+            var results = await neatCsv(zip.readAsText(ent))
+            Readable.from(zip.readAsText(ent))
+            .pipe(csv())
+            .on('data', (data) => results.push(data))
+            .on('end', () => {
+                console.log(`${ent.entryName} added`)
+            });
+            dict[ent.entryName] = results;
+            // dict.push(1)
+        })
+        // console.log(dict)
+    })/* .then(r =>{
+        console.log(dict)
+    }) */.catch(e =>{
+        console.error(e)
     })
-    console.log(dict)
-}).then(r =>{
     // console.log(dict)
+}
+
+// console.log(Object.keys(dict))
+ziptojson().then(() =>{
+    console.log(dict)
 }).catch(e =>{
     console.error(e)
 })
+// console.log(Object.keys(dict))
+
+// axios.get(omd, {responseType: 'arraybuffer'}).then((res) =>{
+//     // console.log(res.data)
+//     return new Az(res.data);
+// }).then( (zip) =>{
+//      zip.getEntries().forEach( async (ent) =>{
+//         var results = await neatCsv(zip.readAsText(ent))
+//         Readable.from(zip.readAsText(ent))
+//         .pipe(csv())
+//         .on('data', (data) => results.push(data))
+//         .on('end', () => {
+//             console.log(`${ent.entryName} added`)
+//         });
+//         dict[ent.entryName] = results;
+//         // dict.push(1)
+//     })
+//     // console.log(dict)
+// }).then(r =>{
+//     // console.log(dict)
+// }).catch(e =>{
+//     console.error(e)
+// })
 
 /* request.get({url: omd, encoding: null}).then((res, body) =>{
     var zip = new Az(body);

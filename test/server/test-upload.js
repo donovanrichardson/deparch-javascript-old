@@ -10,19 +10,38 @@ const csv = require('csv-parser');
 const neatCsv = require('neat-csv');
 
 let omd = "https://openmobilitydata.org/p/mta/86/20200406/download"
-var hi = "hi";
+
+// var hi = {};
+// var hi = "hi";
 
 describe('scope2', () =>{
     it('changes global vars', async () => {
-        await axios.get(omd, {responseType: 'arraybuffer'}) //the await here is necessary for the test to pass
+        // var hi = {};
+        var hi = {};
+        foo = await axios.get(omd, {responseType: 'arraybuffer'}) //the await here is necessary for the test to pass
         .then(res =>{
             return new Az(res.data);
         }).then( (zip) =>{
              zip.getEntries().forEach( async (ent) =>{
-                hi = 1
+                // var results = await neatCsv(zip.readAsText(ent))
+                neatCsv(zip.readAsText(ent)).then(results =>{
+                    hi[ent.entryName] = 1
+                }).catch(e =>{
+                    console.error(e)
+                })
+                // hi[ent.entryName] = results
+                // hi = 1
                 // expect(hi).to.equal(1)
-            })})
-            expect(hi).to.equal(1)
+            })
+        }).then(() =>{
+            console.log(hi)
+            return hi;
+        })
+            console.log(foo)
+            console.log("above is foo")
+            expect(foo["agency.txt"]).to.equal(1)
+            
+            // expect(hi["agency.txt"]).to.equal(1)
     })
 
 })
