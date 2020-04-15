@@ -15,7 +15,7 @@ exports.up = function(knex) {
 
       table.primary(["stop_id", "feed_version"]);
       table.index("stop_name");
-      table.foreign(["parent_station","feed_version"]).references(["stop_id","feed_version"]).inTable("stop").onDelete("CASCADE").onUpdate("CASCADE");
+      table.index(["parent_station","feed_version"])//no more fk constraint bc the fks are present within the same table and won't be inserted in the correct order
       table.foreign("feed_version").references("id").inTable("feed_version").onDelete("CASCADE").onUpdate("CASCADE");
       })
 };
