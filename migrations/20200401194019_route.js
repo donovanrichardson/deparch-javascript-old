@@ -2,7 +2,7 @@ exports.up = function(knex) {
     return knex.schema.createTable("route", table => {
         table.string("route_id", 128);
         table.string("agency_id", 255)
-        table.string("default_name", 255);
+        table.string("default_name", 255); //change this to route_short_name
         table.string("route_long_name", 255);
         table.text("route_desc");
         table.integer("route_type").notNullable();

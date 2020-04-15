@@ -31,6 +31,16 @@ const entrydic = async function(zip){
     return l
 }
 
+const addFv = async(a) =>{
+    // console.log(a[0])
+    r = await a.map( e =>{
+        e["feed_version"] = "fv1"
+        return e
+    })
+    return r
+    
+}
+
 // const importfeed = 
 const dataGive = async link =>{
     return await axios.get(link, {responseType: 'arraybuffer'}) //the await here is necessary for the test to pass
@@ -41,14 +51,18 @@ const dataGive = async link =>{
         // resp.send(await entrydic(new Az(res.data)))
         var geodata = await entrydic(new Az(res.data))
         return geodata
+    }).then(async (data) =>{
+        // console.log(addFv(data["routes.txt"]))
+        exam = await addFv(data["routes.txt"])
+        return exam;
     }).catch(e=>{
         console.error(e)
     })
-}
+} //it's taken me a #hashtag long time to figure out that i need to return from a then
 
-dataGive(omd).then(r=>{
-    console.log(r)
-})
+// dataGive(omd).then(r=>{
+//     console.log(r) //broke: console.log(dataGive(omd)) woke: commented
+// })
 
 app.get('/test', async (req, resp)=>{
     resp.send(await dataGive(omd))
