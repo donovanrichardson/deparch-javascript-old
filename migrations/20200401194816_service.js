@@ -1,7 +1,7 @@
 
 exports.up = function(knex) {
     return knex.schema.createTable("service", table => {
-        table.string("service_id", 128);
+        table.string("service_id", 128).notNullable();
 
         table.integer("monday").defaultTo(0).notNullable();
         table.integer("tuesday").defaultTo(0).notNullable();
@@ -11,7 +11,7 @@ exports.up = function(knex) {
         table.integer("saturday").defaultTo(0).notNullable();
         table.integer("sunday").defaultTo(0).notNullable();
 
-        table.integer("start_date");
+        table.integer("start_date"); //it's important that these stay as integers
         table.integer("end_date");
         table.string("feed_version", 255);
   

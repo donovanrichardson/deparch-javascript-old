@@ -10,13 +10,14 @@ const axios = require('axios').default;
 const { Readable } = require('stream');
 const csv = require('csv-parser');
 const neatCsv = require('neat-csv');
-// const CircularJSON = require('circular-json'); //maybe uninstall
+
+
 
 const api = "f700defc-6fcc-4c3f-9045-5ac5e91d7623" //env var
-
-let omd = "https://openmobilitydata.org/p/mta/86/20200406/download"
-
-var feed_version = "";
+var feedid = 'mbta/64'
+var q = `https://api.transitfeeds.com/v1/getFeedVersions?key=${api}&feed=${feedid}&page=1&limit=10&err=1&warn=1`
+// console.log(q)
+// var url = ""
 
 const entrydic = async function(zip){
     var tootle = {}
@@ -77,8 +78,8 @@ const filterFields = (table, allowed) =>{
     })
 }
 
-const addToAgency = (table, tr) =>{
-    var mod = /* await */ addFv(filterFields(table, ['agency_id', 'agency_name', 'agency_url', 'agency_timezone']), feed_version)
+const addToAgency = async (table, tr) =>{
+    var mod = await addFv(filterFields(table, ['agency_id', 'agency_name', 'agency_url', 'agency_timezone']), feed_version)
     console.log(mod)
     /* await */ knex.batchInsert('agency', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log(`${batches.reduce( (total, r) =>{
@@ -91,9 +92,9 @@ const addToAgency = (table, tr) =>{
  */
 }
 
-const addToStop= (table, tr) =>{
+const addToStop= async (table, tr) =>{
     console.log(table[0])
-    var mod = /* await */ addFv(filterFields(table, ["stop_id","stop_code","stop_name","stop_desc","stop_lat","stop_lon","stop_url","location_type","parent_station","wheelchair_boarding"]), feed_version)
+    var mod = await addFv(filterFields(table, ["stop_id","stop_code","stop_name","stop_desc","stop_lat","stop_lon","stop_url","location_type","parent_station","wheelchair_boarding"]), feed_version)
     console.log(mod[0])
     
     /* await */ knex.batchInsert('stop', mod, 1000).transacting(tr)/* .then(batches =>{ //batches of 10000 was too big and broke the thing
@@ -105,8 +106,8 @@ const addToStop= (table, tr) =>{
     }) */
 }
 
-const addToRoute = (table, tr) =>{
-    var mod = /* await */ addFv(filterFields(table, ["route_id","agency_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_sort_order"]), feed_version)
+const addToRoute = async (table, tr) =>{
+    var mod = await addFv(filterFields(table, ["route_id","agency_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_sort_order"]), feed_version)
     knex.batchInsert('route', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log(`${batches.reduce( (total, r) =>{
             return total += r.rowCount;
@@ -116,11 +117,13 @@ const addToRoute = (table, tr) =>{
     }) */
 }
 
-const addToService = (table, tr) =>{
+const addToService = async  (table, tr) =>{
     if (table !== undefined){
-        var mod = /* await */ addFv(filterFields(table, ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]), feed_version)
+        var mod = await addFv(filterFields(table, ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]), feed_version)
         /* await */ 
-        return tr.raw(`${knex('service').insert(mod).toString()} on conflict (service_id, feed_version) do nothing`)
+        theq = `${knex('service').insert(mod).toString()} on conflict (service_id, feed_version) do nothing`
+        console.log(theq)
+        return tr.raw(theq)
 /*         mod.forEach(async row =>{
             knex.raw(`${knex('service').insert(row).toString()} on conflict (service_id, feed_version) do nothing`).then(()=>{
                 //
@@ -150,9 +153,9 @@ const addToService = (table, tr) =>{
     }
 }
 
-const addCalendarDates = (table, tr) =>{
+const addCalendarDates = async (table, tr) =>{
     if(table !== undefined){
-        var mod = /* await */ addFv(filterFields(table, ["service_id","date","exception_type"]), feed_version)
+        var mod = await addFv(filterFields(table, ["service_id","date","exception_type"]), feed_version)
         return knex.batchInsert('service_exception', mod, 1000).transacting(tr)/* .then(batches =>{
             console.log(`${batches.reduce( (total, r) =>{
                 return total += r.rowCount;
@@ -175,8 +178,8 @@ const addToShape = (table, tr) =>{
     
 }
 
-const addToTrip = (table, tr) =>{
-    var mod = /* await */ addFv(filterFields(table, ["route_id","service_id","shape_id","trip_id","trip_headsign","trip_short_name","direction_id","block_id","wheelchair_accessible","bikes_allowed"]), feed_version)
+const addToTrip = async (table, tr) =>{
+    var mod = await addFv(filterFields(table, ["route_id","service_id","shape_id","trip_id","trip_headsign","trip_short_name","direction_id","block_id","wheelchair_accessible","bikes_allowed"]), feed_version)
     return knex.batchInsert('trip', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log(`${batches.reduce( (total, r) =>{
             return total += r.rowCount;
@@ -186,8 +189,8 @@ const addToTrip = (table, tr) =>{
     }) */
 }
 
-const addToStopTime = (table, tr) =>{
-    var mod = /* await */ addFv(filterFields(table, ["trip_id","arrival_time","departure_time","stop_id","stop_sequence","stop_headsign","pickup_type","drop_off_type","shape_dist_traveled","timepoint"]), feed_version)
+const addToStopTime = async (table, tr) =>{
+    var mod = await addFv(filterFields(table, ["trip_id","arrival_time","departure_time","stop_id","stop_sequence","stop_headsign","pickup_type","drop_off_type","shape_dist_traveled","timepoint"]), feed_version)
     return knex.batchInsert('stop_time', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log("why haint you inserting")
         console.log(`${batches.reduce( (total, r) =>{
@@ -198,37 +201,27 @@ const addToStopTime = (table, tr) =>{
     }) */
 }
 
+gtfs = {}
+var feed_version = ""
+var feedinfo = {}
 
-
-// dataGive(omd).then(r=>{
-//     console.log(r) //broke: console.log(dataGive(omd)) woke: commented
-// })
-
-app.get('/test', async (req, resp)=>{
-    resp.send(await dataGive(omd))
-})
-//ooh yes wait a minute mr post man. i did it!! now, im realizing that i can do the gtfs import one-by-one without returning an object. howevur i think returing an object makes it make more sense for me. lol cuties
-
-app.post('/feed', async (req, res) =>{
-    var feedid = req.query.id;
-    var q = `https://api.transitfeeds.com/v1/getFeedVersions?key=${api}&feed=${feedid}&page=1&limit=10&err=1&warn=1`
-    console.log(q)
-    // var url = ""
-    gtfs = {}
-    var fv = ""
-    var feedinfo = {}
-    tranfeed = axios.get(q).then(gotten =>{
+const init = async () =>{
+    tranfeed = await axios.get(q).then(gotten =>{
         g = gotten.data.results.versions[0]
         // res.send(g)
         return(g)
-    }).then(tf =>{
-        gtfs = /* await */ dataGive(tf.url);
+    }).then(async tf =>{
+        gtfs = await dataGive(tf.url);
         feedinfo = tf.f;
+        feed_version = tf.id
         return tf
     }).catch(e =>{
         console.error(e)
-    })
+    })  
+}
 
+const tx = async () => {
+    await init()
     return knex.transaction((t) =>  {
         return knex('feed').transacting(t).insert({id: feedinfo.id,type: feedinfo.ty, title: feedinfo.t, location: feedinfo.l.id})
     .then(function() {
@@ -265,8 +258,33 @@ app.post('/feed', async (req, res) =>{
  }).finally(()=>{
      knex.destroy()
  });
+}
 
-})
-app.listen(5000, function () {
-    console.log('App listening on port 5000!')
-  })
+tx();
+
+
+ 
+
+//  return knex.transaction(function(t) {
+//     return knex('feed')
+//     .transacting(t)
+//     .insert({id: 'gorl', title:'Example Fuid', location:0, latest:'nunyabeezwax'},/*returning =>*/'*')
+//     .then(function(x) {
+//          console.log(x);
+//          return knex('feed').transacting(t).insert({id: 'queer', title:'Exampleyee Fuid', location:2, latest:'gaygay'},/*returning =>*/'*')
+//     })
+//     .then(t.commit)
+//     .catch(function(e) {
+//          t.rollback();
+//          console.error(e)
+//          throw e;
+//     })
+//  })
+//  .then(function() {
+//   // it worked
+//  })
+//  .catch(function(e) {
+// //   console.error(e)
+//  }).finally(()=>{
+//      knex.destroy()
+//  });

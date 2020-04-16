@@ -7,10 +7,10 @@ exports.up = function(knex) {
         table.string("trip_id", 128);
         table.string("trip_headsign", 255);
         table.string("trip_short_name", 128);
-        table.integer("direction_id");
+        table.specificType("direction_id","char(1)");
         table.string("block_id", 128);
-        table.integer("wheelchair_accessible").defaultTo(0);
-        table.integer("bikes_allowed").defaultTo(0);
+        table.specificType("wheelchair_accessible","char(1)").defaultTo("0");
+        table.specificType("bikes_allowed","char(1)").defaultTo("0");
         table.string("feed_version", 255);
   
         table.primary(["trip_id", "feed_version"]);

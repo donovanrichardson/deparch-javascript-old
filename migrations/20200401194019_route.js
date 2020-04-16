@@ -9,7 +9,7 @@ exports.up = function(knex) {
         table.text("route_url");
         table.string("route_color", 6).defaultTo("ffffff");
         table.string("route_text_color", 6).defaultTo("000000");
-        table.integer("route_sort_order").unsigned();
+        table.text("route_sort_order"); //making all non-oblig elements text to avoid conversion problems
         table.string("feed_version", 255);
   
         table.primary(["route_id", "feed_version"]);

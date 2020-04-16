@@ -5,12 +5,12 @@ exports.up = function(knex) {
       table.string("stop_code", 64);
       table.string("stop_name", 128);
       table.text("stop_desc");
-      table.float("stop_lat", 15, 12);
-      table.float("stop_lon", 15, 12);
+      table.string("stop_lat", 32);
+      table.string("stop_lon", 32);
       table.text("stop_url");
-      table.integer("location_type").unsigned().defaultTo(0).notNullable();
+      table.specificType("location_type","char(1)").defaultTo("0").notNullable();
       table.string("parent_station", 128);
-      table.integer("wheelchair_boarding").defaultTo(0);
+      table.specificType("wheelchair_boarding","char(1)").defaultTo("0");
       table.string("feed_version", 255);
 
       table.primary(["stop_id", "feed_version"]);

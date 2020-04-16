@@ -6,8 +6,8 @@ exports.up = function(knex) {
         table.bigInteger("timestamp").unsigned().notNullable();
         table.bigInteger("size").unsigned().notNullable();
         table.text("url").notNullable();
-        table.integer("start");
-        table.integer("finish");
+        table.specificType("start", "char(8)");
+        table.specificType("finish", "char(8)");
         table.timestamp("inserted").notNullable().defaultTo(knex.fn.now()); //tz is true in postgres
 
         table.foreign("feed").references("id").inTable("feed").onDelete("CASCADE").onUpdate("CASCADE");

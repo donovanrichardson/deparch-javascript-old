@@ -1,8 +1,8 @@
 
 exports.up = function(knex) {
   return knex.schema.createTable("service_exception", table => {
-      table.string("service_id");
-      table.integer("date");
+      table.string("service_id").notNullable();
+      table.integer("date").notNullable();
       table.integer("exception_type").notNullable();
       table.string("feed_version", 255);
 
