@@ -67,4 +67,12 @@ for(var i = 0; i < 100; i++){
 
 // console.log(knex.batchInsert('feed', a, 10000).toString());
 
-console.log(knex('feed').insert(a).toString());
+// console.log(knex('feed').insert(a).toString());
+
+// console.log(knex('stop').update({parent_station: knex.ref('stop_id')}).where({location_type:'0', parent_station: null}).toString())
+
+// console.log(knex('stop').update({parent_station: knex.ref('stop_id')}).where({location_type:'0'}).whereNull('parent_station').toString())
+
+//the above two are the same
+
+console.log(knex('stop').update({parent_station: knex.ref('stop_id')}).where({location_type:'0'}).where(w => w.where({parent_station: ''}).orWhereNull('parent_station')).toString())

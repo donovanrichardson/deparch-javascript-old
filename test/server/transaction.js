@@ -11,11 +11,6 @@ const { Readable } = require('stream');
 const csv = require('csv-parser');
 const neatCsv = require('neat-csv');
 
-
-
-const api = "f700defc-6fcc-4c3f-9045-5ac5e91d7623" //env var
-var feedid = 'mbta/64'
-var q = `https://api.transitfeeds.com/v1/getFeedVersions?key=${api}&feed=${feedid}&page=1&limit=10&err=1&warn=1`
 // console.log(q)
 // var url = ""
 
@@ -201,17 +196,21 @@ const addToStopTime = async (table, tr) =>{
     }) */
 }
 
-gtfs = {}
+const api = "f700defc-6fcc-4c3f-9045-5ac5e91d7623" //env var
+// var feedid = 'mbta/64'
+
+url = ''
 var feed_version = ""
 var feedinfo = {}
 
-const init = async () =>{
+const init = async (feed) =>{
+    var q = `https://api.transitfeeds.com/v1/getFeedVersions?key=${api}&feed=${feed}&page=1&limit=10&err=1&warn=1`
     tranfeed = await axios.get(q).then(gotten =>{
         g = gotten.data.results.versions[0]
         // res.send(g)
         return(g)
     }).then(async tf =>{
-        gtfs = await dataGive(tf.url);
+        url = tf.url
         feedinfo = tf.f;
         feed_version = tf.id
         return tf
@@ -220,13 +219,184 @@ const init = async () =>{
     })  
 }
 
-const tx = async () => {
+const getFv = async(feed) =>{
+    return knex('feed').select().where({id: feed}).first().then(feed =>{
+        return feed.latest
+    }).catch(e=>{
+        console.error(e)
+    })
+}
+
+const getTT = async(route, origin, dest, date, feed) =>{
+    fv = await getFv(feed)
+
+    mdy = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate()}`
+
+    return await knex.raw(
+    `SELECT DISTINCT 
+    sq2.departure_time, 
+    stop2.stop_name AS from, 
+    stop.stop_name AS to, 
+    trip.route_id
+  FROM stop_time AS sq1
+    LEFT OUTER JOIN stop
+    ON (
+      stop.stop_id = sq1.stop_id
+      AND stop.feed_version = sq1.feed_version
+    )
+    LEFT OUTER JOIN trip
+    ON (
+      trip.trip_id = sq1.trip_id
+      AND trip.feed_version = sq1.feed_version
+    )
+    RIGHT OUTER JOIN stop_time AS sq2
+    ON (
+      sq2.trip_id = sq1.trip_id
+      AND sq2.feed_version = sq1.feed_version
+    )
+    LEFT OUTER JOIN stop AS stop2
+    ON (
+      sq2.stop_id = stop2.stop_id
+      AND sq2.feed_version = stop2.feed_version
+    )
+  WHERE (
+    sq1.stop_sequence > sq2.stop_sequence
+    AND stop2.parent_station = :ori
+    AND stop.parent_station = :des
+    AND trip.service_id IN (
+      SELECT service.service_id
+      FROM service
+      WHERE (
+        EXISTS (
+          SELECT 
+            service_exception.service_id, 
+            service_exception.date, 
+            service_exception.exception_type, 
+            service_exception.feed_version
+          FROM service_exception
+          WHERE (
+            service_exception.date = :dat
+            AND service.service_id = service_exception.service_id
+            AND service_exception.exception_type = 1
+            AND service_exception.feed_version = :ver
+            AND service.feed_version = :ver
+          )
+        )
+        OR (
+          :dat BETWEEN cast(service.start_date AS integer) AND cast(service.end_date AS integer)
+          AND service.sunday = 1
+          AND service.feed_version = :ver
+          AND NOT EXISTS (
+            SELECT 
+              service_exception.service_id, 
+              service_exception.date, 
+              service_exception.exception_type, 
+              service_exception.feed_version
+            FROM service_exception
+            WHERE (
+              service_exception.date = :dat
+              AND service.service_id = service_exception.service_id
+              AND service_exception.exception_type = 2
+              AND service_exception.feed_version = :ver
+            )
+          )
+        )
+      )
+    )
+    AND trip.feed_version = :ver
+    AND trip.route_id = :rou
+  )`,{
+      ver: fv,
+      rou: route,
+      ori: origin,
+      des: dest,
+      dat: mdy
+  }
+    ).then(timetable=>{
+        return timetable.rows
+    })
+}
+
+const getDests = async (route, origin, feed) =>{
+    fv = await getFv(feed)
+
+    return knex.raw(`SELECT DISTINCT ps1.stop_id, ps1.stop_name FROM stop_time LEFT JOIN stop ON stop.stop_id = stop_time.stop_id AND stop.feed_version = stop_time.feed_version LEFT JOIN stop AS ps1 ON stop.parent_station = ps1.stop_id AND stop.feed_version = ps1.feed_version LEFT JOIN trip ON trip.trip_id = stop_time.trip_id AND trip.feed_version = stop_time.feed_version RIGHT JOIN stop_time AS st2 ON st2.trip_id = stop_time.trip_id AND st2.feed_version = stop_time.feed_version LEFT JOIN stop AS stop2 ON stop2.stop_id = st2.stop_id AND stop2.feed_version = st2.feed_version LEFT JOIN stop AS ps2 ON stop2.parent_station = ps2.stop_id AND stop2.feed_version = ps2.feed_version WHERE trip.route_id = :rou AND stop_time.stop_sequence > st2.stop_sequence AND ps2.stop_id = :ori AND stop_time.feed_version = :ver;`,{
+        rou: route,
+        ori: origin,
+        ver: fv
+    }).then(d =>{
+        return d.rows;
+    }).catch(e=>{
+        console.error(e)
+    }) //this can be changed to use stop.parent_station instead of parent.stop_id
+}
+
+const getStops = async (route, feed) =>{
+
+    fv = await getFv(feed)
+
+    var result = await knex('stop_time').distinct('stop.parent_station as stop_id', 'stop.stop_name').leftJoin('trip', function() {this.on('trip.trip_id','=','stop_time.trip_id').on('trip.feed_version','=','stop_time.feed_version')}).leftJoin('stop',function() {this.on('stop_time.stop_id','=','stop.stop_id').on('stop.feed_version','=','stop_time.feed_version')}).where('trip.route_id', route).where("stop_time.feed_version", fv)
+    return result;
+}
+
+const getRoutes = async (feed) => {
+    var result = await knex('feed').select().where({id: feed}).then(r =>{
+        var routefv = r[0].latest
+        return knex('route').select().where({feed_version: routefv})
+    }).catch(e =>{
+        console.error(e)
+    })/* .finally(()=>{
+        knex.destroy();
+    }) */
+    return result
+}
+
+const rmfv = async (fv) =>{
+    return knex.transaction((t) =>  {
+        return knex('stop_time').transacting(t).delete().where({feed_version: fv})
+    .then(function() {
+        return knex('trip').transacting(t).delete().where({feed_version: fv})
+    })./* then(()=>{
+        return knex('shape').transacting(t).delete().where({feed_version: fv})
+    }). */then(()=>{
+        return knex('service_exception').transacting(t).delete().where({feed_version: fv})
+    }).then(()=>{
+        return knex('service').transacting(t).delete().where({feed_version: fv})
+    }).then(()=>{
+        return knex('route').transacting(t).delete().where({feed_version: fv})
+    }).then(()=>{
+        return knex('stop').transacting(t).delete().where({feed_version: fv})
+    }).then(()=>{
+        return knex('agency').transacting(t).delete().where({feed_version: fv})
+    }).then(()=>{
+        return knex('feed_version').transacting(t).delete().where({id: fv})
+    })
+    .then(t.commit)
+    .catch(function(e) {
+         t.rollback();
+         console.error(e)
+         throw e;
+    })
+ })
+ .then(function() {
+  // it worked
+ })
+ .catch(function(e) {
+//   console.error(e)
+ })/* .finally(()=>{
+     knex.destroy()
+ }); */
+}
+
+const impfeed = async () => {
+    var gtfs = {}
     await init()
     return knex.transaction((t) =>  {
-        return knex('feed').transacting(t).insert({id: feedinfo.id,type: feedinfo.ty, title: feedinfo.t, location: feedinfo.l.id})
+        return t.raw(`${knex('feed').insert({id: feedinfo.id,type: feedinfo.ty, title: feedinfo.t, location: feedinfo.l.id})}on conflict (id) do nothing`) 
     .then(function() {
         return knex('feed_version').transacting(t).insert({id: tranfeed.id, feed: tranfeed.f.id, timestamp: tranfeed.ts, size: tranfeed.size, url: tranfeed.url, start: tranfeed.d.s, finish: tranfeed.d.f})
-    }).then(()=>{
+    }).then(async ()=>{
+        gtfs = await dataGive(url);
         return addToAgency(gtfs["agency.txt"], t)
     }).then(()=>{
         return addToStop(gtfs["stops.txt"], t)
@@ -242,6 +412,12 @@ const tx = async () => {
         return addToTrip(gtfs["trips.txt"], t)
     }).then(()=>{
         return addToStopTime(gtfs["stop_times.txt"], t)
+    }).then(()=>{
+        return knex('stop').transacting(t).update({parent_station: knex.ref('stop_id')}).where({location_type:'0'}).where(w => w.where({parent_station: ''}).orWhereNull('parent_station'))
+    }).then(()=>{
+        return t.raw(`update stop set parent_station = parent.parent_station from stop as parent where stop.parent_station = parent.stop_id and stop.feed_version = parent.feed_version and stop.location_type = '4'`)
+    }).then(()=>{
+        return knex('feed').transacting(t).update({latest: feed_version}).where({id: feedinfo.id})
     })
     .then(t.commit)
     .catch(function(e) {
@@ -255,36 +431,15 @@ const tx = async () => {
  })
  .catch(function(e) {
 //   console.error(e)
- }).finally(()=>{
+ })/* .finally(()=>{
      knex.destroy()
- });
+ }); */
 }
 
-tx();
+// tx();
+// rmfv('mbta/64/20200416')
+// getRoutes('mbta/64');
 
+// console.log(getDests('39', 'forhl', 'fv'))
 
- 
-
-//  return knex.transaction(function(t) {
-//     return knex('feed')
-//     .transacting(t)
-//     .insert({id: 'gorl', title:'Example Fuid', location:0, latest:'nunyabeezwax'},/*returning =>*/'*')
-//     .then(function(x) {
-//          console.log(x);
-//          return knex('feed').transacting(t).insert({id: 'queer', title:'Exampleyee Fuid', location:2, latest:'gaygay'},/*returning =>*/'*')
-//     })
-//     .then(t.commit)
-//     .catch(function(e) {
-//          t.rollback();
-//          console.error(e)
-//          throw e;
-//     })
-//  })
-//  .then(function() {
-//   // it worked
-//  })
-//  .catch(function(e) {
-// //   console.error(e)
-//  }).finally(()=>{
-//      knex.destroy()
-//  });
+module.exports = {impfeed , rmfv, getRoutes, getStops, getDests, getTT}

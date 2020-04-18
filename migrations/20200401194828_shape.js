@@ -10,6 +10,7 @@ exports.up = function(knex) {
   
         table.primary(["shape_id","shape_pt_sequence", "feed_version"]);
         table.foreign("feed_version").references("id").inTable("feed_version").onDelete("CASCADE").onUpdate("CASCADE");
+        table.index("feed_version");
         })
   };
   

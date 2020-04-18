@@ -15,6 +15,7 @@ exports.up = function(knex) {
         table.primary(["route_id", "feed_version"]);
         table.index("route_short_name");
         table.foreign("feed_version").references("id").inTable("feed_version").onDelete("CASCADE").onUpdate("CASCADE");
+        table.index("feed_version");
         })
   };
   

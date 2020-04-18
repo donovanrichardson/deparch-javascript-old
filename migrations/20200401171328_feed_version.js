@@ -11,6 +11,7 @@ exports.up = function(knex) {
         table.timestamp("inserted").notNullable().defaultTo(knex.fn.now()); //tz is true in postgres
 
         table.foreign("feed").references("id").inTable("feed").onDelete("CASCADE").onUpdate("CASCADE");
+        table.index('feed')
     })
 };
 

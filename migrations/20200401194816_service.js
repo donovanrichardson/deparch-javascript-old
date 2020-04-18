@@ -17,6 +17,7 @@ exports.up = function(knex) {
   
         table.primary(["service_id", "feed_version"]);
         table.foreign("feed_version").references("id").inTable("feed_version").onDelete("CASCADE").onUpdate("CASCADE");
+        table.index("feed_version");
         })
   };
   

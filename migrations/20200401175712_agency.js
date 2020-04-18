@@ -9,6 +9,7 @@ exports.up = function(knex) {
       table.string("feed_version", 255).notNullable();
 
       table.foreign("feed_version").references("id").inTable("feed_version").onDelete("CASCADE").onUpdate("CASCADE");
+      table.index("feed_version");
   })
 };
 

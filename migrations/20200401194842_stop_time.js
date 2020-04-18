@@ -17,6 +17,8 @@ exports.up = function(knex) {
         table.foreign(["trip_id", "feed_version"]).references(["trip_id", "feed_version"]).inTable("trip").onDelete("CASCADE").onUpdate("CASCADE");
         table.foreign(["stop_id", "feed_version"]).references(["stop_id", "feed_version"]).inTable("stop").onDelete("CASCADE").onUpdate("CASCADE");
         table.foreign("feed_version").references("id").inTable("feed_version").onDelete("CASCADE").onUpdate("CASCADE");
+        table.index("feed_version");
+        table.index("stop_id");
         })
   };
   
