@@ -1,16 +1,14 @@
 const express = require('express')
 const app = express()
-const Az = require('adm-zip');
-var expect  = require('chai').expect;
-var assert  = require('chai').assert;
-const env = 'development';
-const config = require('../../knexfile.js')[env];
-const knex = require('knex')(config);
-const axios = require('axios').default;
-const { Readable } = require('stream');
-const csv = require('csv-parser');
-const neatCsv = require('neat-csv');
-const {impfeed , rmfv, getRoutes, getStops, getDests, getTT} = require('./transaction')
+// const Az = require('adm-zip');
+const env = process.env.DEVPROD;
+// const config = require('../knexfile')[env];
+// const knex = require('knex')(config);
+// const axios = require('axios').default;
+// const { Readable } = require('stream');
+// const csv = require('csv-parser');
+// const neatCsv = require('neat-csv');
+const {impfeed , rmfv, getRoutes, getStops, getDests, getTT} = require('./api')
 // const CircularJSON = require('circular-json'); //maybe uninstall
 
 
@@ -23,6 +21,17 @@ const {impfeed , rmfv, getRoutes, getStops, getDests, getTT} = require('./transa
 
 app.post('/feed', async (req, res) =>{
     var feedid = req.query.id;
+    var key = req.query.key
+    if(key == process.env.DPCHKEY){
+        impfeed(feedid).then(r=>{
+            res.send({result: r}) //make this more verbose, send response code
+        }).catch(e =>{
+            res.send({result: "there was an error"})
+            console.error(e)
+        })
+    }else{
+        res.send({result: "wrong api key"})
+    }
 })
 
 app.get('/routes', async(req, res) =>{

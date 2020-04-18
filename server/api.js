@@ -1,14 +1,10 @@
-const express = require('express')
-const app = express()
 const Az = require('adm-zip');
-var expect  = require('chai').expect;
-var assert  = require('chai').assert;
-const env = 'development';
-const config = require('../../knexfile.js')[env];
+const env = process.env.DEVPROD;
+const config = require('../knexfile.js')[env];
 const knex = require('knex')(config);
 const axios = require('axios').default;
-const { Readable } = require('stream');
-const csv = require('csv-parser');
+// const { Readable } = require('stream');
+// const csv = require('csv-parser');
 const neatCsv = require('neat-csv');
 
 // console.log(q)
@@ -76,7 +72,7 @@ const filterFields = (table, allowed) =>{
 const addToAgency = async (table, tr) =>{
     var mod = await addFv(filterFields(table, ['agency_id', 'agency_name', 'agency_url', 'agency_timezone']), feed_version)
     console.log(mod)
-    /* await */ knex.batchInsert('agency', mod, 1000).transacting(tr)/* .then(batches =>{
+    /* await */return knex.batchInsert('agency', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log(`${batches.reduce( (total, r) =>{
             return total += r.rowCount;
         }, 0)} rows added to agency`)
@@ -92,7 +88,7 @@ const addToStop= async (table, tr) =>{
     var mod = await addFv(filterFields(table, ["stop_id","stop_code","stop_name","stop_desc","stop_lat","stop_lon","stop_url","location_type","parent_station","wheelchair_boarding"]), feed_version)
     console.log(mod[0])
     
-    /* await */ knex.batchInsert('stop', mod, 1000).transacting(tr)/* .then(batches =>{ //batches of 10000 was too big and broke the thing
+    /* await */return knex.batchInsert('stop', mod, 1000).transacting(tr)/* .then(batches =>{ //batches of 10000 was too big and broke the thing
         console.log(`${batches.reduce( (total, r) =>{
             return total += r.rowCount;
         }, 0)} rows added to stop`)
@@ -103,7 +99,7 @@ const addToStop= async (table, tr) =>{
 
 const addToRoute = async (table, tr) =>{
     var mod = await addFv(filterFields(table, ["route_id","agency_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_sort_order"]), feed_version)
-    knex.batchInsert('route', mod, 1000).transacting(tr)/* .then(batches =>{
+    return knex.batchInsert('route', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log(`${batches.reduce( (total, r) =>{
             return total += r.rowCount;
         }, 0)} rows added to route`)
@@ -116,9 +112,11 @@ const addToService = async  (table, tr) =>{
     if (table !== undefined){
         var mod = await addFv(filterFields(table, ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]), feed_version)
         /* await */ 
-        theq = `${knex('service').insert(mod).toString()} on conflict (service_id, feed_version) do nothing`
-        console.log(theq)
-        return tr.raw(theq)
+        if (mod.length > 0){ //not needed for batch insert
+            theq = `${knex('service').insert(mod).toString()} on conflict (service_id, feed_version) do nothing`
+            console.log(theq)
+            return tr.raw(theq)
+    }
 /*         mod.forEach(async row =>{
             knex.raw(`${knex('service').insert(row).toString()} on conflict (service_id, feed_version) do nothing`).then(()=>{
                 //
@@ -388,9 +386,9 @@ const rmfv = async (fv) =>{
  }); */
 }
 
-const impfeed = async () => {
+const impfeed = async (feedId) => {
     var gtfs = {}
-    await init()
+    await init(feedId)
     return knex.transaction((t) =>  {
         return t.raw(`${knex('feed').insert({id: feedinfo.id,type: feedinfo.ty, title: feedinfo.t, location: feedinfo.l.id})}on conflict (id) do nothing`) 
     .then(function() {
