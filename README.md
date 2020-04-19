@@ -4,12 +4,7 @@ A Node.js project for retrieving scheduled departure times for transit using GTF
 
 Right now it is just a back end; soon I will create a front end that will generate timetables with this API.
 
-Currently this API supports four agencies:
-
-- **mbta/64** Boston MBTA
-- **mta/86** Long Island Rail Road
-- **mta/79** New York City Subway
-- **sfmta/60** San Francisco Muni Metro
+Currently this API supports querying the Long Island Rail Road (feed id `mta/86`).
 
 This API uses GTFS data stored in a PostgreSQL database. Database import is not automated, so support for the agencies is based totally on which I decide to upload and maintain (I welcome assistance on this though!). GTFS feeds are obtained from their respective transit agencies through OpenMobilityData.org (aka transitfeeds.com) which provides a large repository of current GTFS data from many agencies worldwide
 
