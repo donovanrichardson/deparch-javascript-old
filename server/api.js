@@ -235,7 +235,9 @@ const getTT = async(route, origin, dest, date, feed) =>{
     sq2.departure_time, 
     stop2.stop_name AS from, 
     stop.stop_name AS to, 
-    trip.route_id
+    trip.route_id,
+    route.route_short_name,
+    route.route_long_name
   FROM stop_time AS sq1
     LEFT OUTER JOIN stop
     ON (
@@ -246,6 +248,11 @@ const getTT = async(route, origin, dest, date, feed) =>{
     ON (
       trip.trip_id = sq1.trip_id
       AND trip.feed_version = sq1.feed_version
+    )
+    LEFT OUTER JOIN route
+    ON (
+        trip.route_id = route.route_id
+        AND trip.feed_version = route.feed_version
     )
     RIGHT OUTER JOIN stop_time AS sq2
     ON (

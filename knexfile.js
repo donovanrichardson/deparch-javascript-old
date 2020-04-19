@@ -5,9 +5,9 @@ module.exports = {
   development: {
     client: 'postgresql',
     connection: {
-      database: 'deparch',
-      user:     'postgres',
-      password: ''
+      database: process.env.DEVDB,
+      user:     process.env.DEVUSER,
+      password: process.env.DEVPW
     },
     pool: {
       min: 2,
