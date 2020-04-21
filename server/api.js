@@ -98,7 +98,7 @@ const addToStop= async (table, tr) =>{
 }
 
 const addToRoute = async (table, tr) =>{
-    var mod = await addFv(filterFields(table, ["route_id","agency_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_sort_order"]), feed_version)
+    var mod = await addFv(filterFields(table, ["route_id","agency_id","route_short_name","route_long_name","route_desc","route_type","route_url","route_sort_order","route_color", "route__text_color"]), feed_version)
     return knex.batchInsert('route', mod, 1000).transacting(tr)/* .then(batches =>{
         console.log(`${batches.reduce( (total, r) =>{
             return total += r.rowCount;
