@@ -495,4 +495,4 @@ const localImp = async (feed) =>{
 //mta/79
 //rabbit-transit/383
 
-module.exports = {impfeed , rmfv, getRoutes, getStops, getDests, getTT, localImp}
+module.exports = {impfeed , rmfv, getRoutes, getStops, getDests, getTT, localImp, prodfeeds}
