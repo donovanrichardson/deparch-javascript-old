@@ -25,9 +25,17 @@ app.post('/feed', async (req, res) =>{
     if(key == process.env.DPCHKEY){
         impfeed(feedid).then(r=>{
             res.send({result: r}) //make this more verbose, send response code
+            const used = process.memoryUsage();
+                for (let key in used) {
+                console.log(`${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+            }
         }).catch(e =>{
             res.send({result: "there was an error"})
             console.error(e)
+            const used = process.memoryUsage();
+                for (let key in used) {
+                console.log(`${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+            }
         })
     }else{
         res.send({result: "wrong api key"})

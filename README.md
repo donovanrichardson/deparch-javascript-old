@@ -58,7 +58,7 @@ Provides json output listing destinations *on a particular route* from the speci
 - **stop_id**: A unique identifier for this stop.
 ￼￼
 ### tt (short for Timetable)
-[deparch-js.herokuapp.com/tt](http://localhost:5000/tt?feed=mbta/64&route=Red&origin=place-harsq&dest=place-jfk&year=2020&month=4&date=20)
+[deparch-js.herokuapp.com/tt](https://deparch-js.herokuapp.com/tt?feed=mbta/64&route=Red&origin=place-harsq&dest=place-jfk&year=2020&month=4&date=20)
 
 Provides json output listing destinations *on a particular route* from the specified origin.
 
