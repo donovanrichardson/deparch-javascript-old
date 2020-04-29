@@ -1,7 +1,8 @@
 const Az = require('adm-zip');
 const env = process.env.DEVPROD;
 const config = require('../knexfile.js')[env];
-const knex = require('knex')(config);
+const config2 = require('../knexfile.js')["production"];
+var knex = require('knex')(config);
 const axios = require('axios').default;
 // const { Readable } = require('stream');
 // const csv = require('csv-parser');
@@ -84,7 +85,7 @@ const addToAgency = async (table, tr) =>{
 }
 
 const addToStop= async (table, tr) =>{
-    console.log(table[0])
+    // console.log(table[0])
     var mod = await addFv(filterFields(table, ["stop_id","stop_code","stop_name","stop_desc","stop_lat","stop_lon","stop_url","location_type","parent_station","wheelchair_boarding"]), feed_version)
     console.log(mod[0])
     
@@ -396,9 +397,11 @@ const rmfv = async (fv) =>{
 const impfeed = async (feedId) => {
     var gtfs = {}
     await init(feedId)
+    console.log("init fv")
     return knex.transaction((t) =>  {
+        console.log("insert f")
         return t.raw(`${knex('feed').insert({id: feedinfo.id,type: feedinfo.ty, title: feedinfo.t, location: feedinfo.l.id})}on conflict (id) do nothing`) 
-    .then(function() {
+    .then(async function() {
         return knex('feed_version').transacting(t).insert({id: tranfeed.id, feed: tranfeed.f.id, timestamp: tranfeed.ts, size: tranfeed.size, url: tranfeed.url, start: tranfeed.d.s, finish: tranfeed.d.f})
     }).then(async ()=>{
         gtfs = await dataGive(url);
@@ -446,5 +449,81 @@ const impfeed = async (feedId) => {
 // getRoutes('mbta/64');
 
 // console.log(getDests('39', 'forhl', 'fv'))
+
+const feeds = () =>{
+    return knex('feed').select("id").then(f =>{
+        console.log(f) //feeds(...).forEach is not a function hmmmmm
+        return f;
+    }).catch(e =>{
+        console.error(e)
+    }).finally(()=>{
+        knex.destroy()
+    })
+}
+
+const changeKnex = () =>{
+    knex = require('knex')(config2);
+}
+
+const prodfeeds = () =>{
+    changeKnex()
+    feeds()
+}
+
+const localImp = async (feed) =>{
+    changeKnex()
+    start = process.hrtime()
+    impfeed(feed).then((imp)=>{
+        console.log(`${imp} <- was imported`)
+        return process.hrtime(start)
+    }).then(time =>{
+        console.log(`${time[0]}s, ${time[1]/1000000}ms`)
+    }).finally(()=>{
+        knex.destroy()
+    })
+    
+}
+
+// async function asyncForEach(array, callback) {
+//     var start = process.hrtime()
+//     for (let index = 0; index < array.length; index++) {
+//       await callback(array[index], index, array);
+//       var time = process.hrtime(start)
+//       console.log(`${Math.floor(time[0]/60)}minutes, ${time[0] % 60}seconds, ${time[1]/1000000}ms`);
+//     }
+//   }
+
+const impromise = (fid) =>{
+    return impfeed(fid);
+}
+
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array)
+    }
+  }
+
+const impAll = async () =>{ //i am not able to import/update all feeds for some reason
+    // changeKnex()
+    // promises = []
+    fz = await feeds();
+    promises = fz.map(f => {
+        return impromise(f.id)
+    })
+    console.log("notyet")
+    Promise.all(promises)
+
+}
+
+// feeds()
+// prodfeeds()
+impAll()
+// localImp("mta/79")
+
+
+// localImp("mbta/64")
+
+//mta/79
+//rabbit-transit/383
 
 module.exports = {impfeed , rmfv, getRoutes, getStops, getDests, getTT}
