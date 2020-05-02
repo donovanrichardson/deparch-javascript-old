@@ -485,12 +485,18 @@ const localImp = async (feed) =>{
 }
 
 // feeds()
-// prodfeeds()
+// prodfeeds() //query current feeds
 // impAll()
 // localImp(/* insert feed here */)
 
+//   localImp('septa/262')
+//   localImp('mta/79')
+//   localImp('mta/86')
+//   localImp('rabbit-transit/383')
+//   localImp('mbta/64')
 
-// localImp("mbta/64")
+// localImp("mbta/64") //update feeds
+//\{(.*?)('.*?')(.*?)\},*$ -> localImp($2)
 
 //mta/79
 //rabbit-transit/383
