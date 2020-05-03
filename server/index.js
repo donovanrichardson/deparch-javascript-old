@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const cors = require("cors");
 // const Az = require('adm-zip');
 const env = process.env.DEVPROD;
 // const config = require('../knexfile')[env];
@@ -18,6 +19,8 @@ const {impfeed , rmfv, getRoutes, getStops, getDests, getTT} = require('./api')
 // })
 
 //ooh yes wait a minute mr post man. i did it!! now, im realizing that i can do the gtfs import one-by-one without returning an object. howevur i think returing an object makes it make more sense for me. lol cuties
+
+app.use(cors());
 
 app.post('/feed', async (req, res) =>{
     var feedid = req.query.id;
