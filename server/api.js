@@ -229,7 +229,7 @@ const getFv = async(feed) =>{
 const getTT = async(route, origin, dest, date, feed) =>{
     fv = await getFv(feed)
 
-    mdy = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate()}`
+    mdy = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}`
 
     return await knex.raw(
     `SELECT DISTINCT 
@@ -319,6 +319,7 @@ const getTT = async(route, origin, dest, date, feed) =>{
       dat: mdy
   }
     ).then(timetable=>{
+        console.log(timetable)
         return timetable.rows
     })
 }
@@ -347,8 +348,8 @@ const getStops = async (route, feed) =>{
 
 const getRoutes = async (feed) => {
     var result = await knex('feed').select().where({id: feed}).then(r =>{
-        var routefv = r[0].latest
-        return knex('route').select().where({feed_version: routefv})
+        var routefv = r[0].latest //am i not able to use getFv?
+        return knex('route').select().where({feed_version: routefv}) //may be good to ensure order by route order???
     }).catch(e =>{
         console.error(e)
     })/* .finally(()=>{

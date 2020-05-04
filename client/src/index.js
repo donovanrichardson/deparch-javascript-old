@@ -4,15 +4,15 @@ import { Route, Link, BrowserRouter as Router, Switch } from 'react-router-dom'
 import './index.css';
 import App from './App';
 import Routes from './component/routes'
-// import Stops from './component/stops'
-// import Dests from './component/dests'
-// import Timetable from './component/timetable'
+import Stops from './component/stops'
+import Dests from './component/dests'
+import Timetable from './component/timetable'
 import Notfound from './component/notfound'
 import * as serviceWorker from './serviceWorker';
 
 const routing = (
   <Router>
-    <div>
+    {/* <div>
       <ul>
         <li>
           <Link to="/">Home</Link>
@@ -23,16 +23,16 @@ const routing = (
         <li>
           <Link to="/contact">Contact</Link>
         </li>
-      </ul>
+      </ul> */}
       <Switch>
         <Route exact path="/" component={App} />
-        <Route path="/:agency/routes/" component={Routes} />
-        {/* <Route path="/:agency/stops" component={Stops} />
+        <Route path="/:agency/routes" component={Routes} />
+         <Route path="/:agency/stops" component={Stops} />
         <Route path="/:agency/dests" component={Dests} />
-        <Route path="/:agency/tt" component={Timetable} /> */}
+        <Route path="/:agency/tt" component={Timetable} />
         <Route component={Notfound} />
       </Switch>
-    </div>
+    {/* </div> */}
   </Router>
 )
 
