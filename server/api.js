@@ -231,6 +231,7 @@ const getTT = async(route, origin, dest, date, feed) =>{
 
     mdy = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}`
 
+    //in thhe future i can return the route info separately from the departure rows
     return await knex.raw(
     `SELECT DISTINCT 
     sq2.departure_time, 
@@ -238,7 +239,9 @@ const getTT = async(route, origin, dest, date, feed) =>{
     stop.stop_name AS to, 
     trip.route_id,
     route.route_short_name,
-    route.route_long_name
+    route.route_long_name,
+    route.route_color,
+    route.route_text_color
   FROM stop_time AS sq1
     LEFT OUTER JOIN stop
     ON (
@@ -311,7 +314,8 @@ const getTT = async(route, origin, dest, date, feed) =>{
     )
     AND trip.feed_version = :ver
     AND trip.route_id = :rou
-  )`,{
+  )
+  ORDER BY sq2.departure_time`,{
       ver: fv,
       rou: route,
       ori: origin,
