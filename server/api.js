@@ -7,6 +7,7 @@ const axios = require('axios').default;
 // const { Readable } = require('stream');
 // const csv = require('csv-parser');
 const neatCsv = require('neat-csv');
+const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; //case insensitive
 
 // console.log(q)
 // var url = ""
@@ -16,7 +17,9 @@ const entrydic = async function(zip){
     var l = await zip.getEntries()/*.forEach( async i */.reduce(async (total, i)=>{
         // console.log(total)
         /* total[i.entryName] = await  */
-        await neatCsv(zip.readAsText(i)).then(j=>{
+        await neatCsv(zip.readAsText(i),{
+            mapHeaders: ({ header, index }) => header.trim() //i would love if agencies did not include unnecessary whitespace in their data
+            }).then(j=>{
             tootle[i.entryName] = j
         }).catch(e=>{
             console.error(e)
@@ -111,6 +114,7 @@ const addToRoute = async (table, tr) =>{
 
 const addToService = async  (table, tr) =>{
     if (table !== undefined){
+        // console.log(table)
         var mod = await addFv(filterFields(table, ["service_id","monday","tuesday","wednesday","thursday","friday","saturday","sunday","start_date","end_date"]), feed_version)
         /* await */ 
         if (mod.length > 0){ //not needed for batch insert
@@ -293,7 +297,7 @@ const getTT = async(route, origin, dest, date, feed) =>{
         )
         OR (
           :dat BETWEEN cast(service.start_date AS integer) AND cast(service.end_date AS integer)
-          AND service.sunday = 1
+          AND service.${weekdays[date.getDay()]} = 1
           AND service.feed_version = :ver
           AND NOT EXISTS (
             SELECT 
@@ -409,6 +413,7 @@ const impfeed = async (feedId) => {
     .then(async function() {
         return knex('feed_version').transacting(t).insert({id: tranfeed.id, feed: tranfeed.f.id, timestamp: tranfeed.ts, size: tranfeed.size, url: tranfeed.url, start: tranfeed.d.s, finish: tranfeed.d.f})
     }).then(async ()=>{
+        console.log(url);
         gtfs = await dataGive(url);
         return addToAgency(gtfs["agency.txt"], t)
     }).then(()=>{
@@ -499,7 +504,7 @@ const localImp = async (feed) =>{
 //   localImp('mta/86')
 //   localImp('rabbit-transit/383')
 //   localImp('mbta/64')
-// impfeed('mbta/64')
+// impfeed('septa/262')
 
 // localImp("mbta/64") //update feeds
 //\{(.*?)('.*?')(.*?)\},*$ -> localImp($2)
