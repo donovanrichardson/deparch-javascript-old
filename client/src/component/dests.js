@@ -15,7 +15,7 @@ const Dests = (props =>{
   const getDests = async () => {
     try {
         
-        const response = await fetch(`${pprocess.env.REACT_APP_FETCH_URL||''}/dests?feed=${id}&route=${route}&origin=${origin}`);
+        const response = await fetch(`${process.env.REACT_APP_FETCH_URL||''}/dests?feed=${id}&route=${route}&origin=${origin}`);
         const jsonData = await response.json();
         setDests(jsonData);
         // console.log(jsonData)
