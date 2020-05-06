@@ -50,7 +50,7 @@ const Timetable = (props) =>{
     const getRoutes = async () => {
         try {
             
-            const query = `${process.env.REACT_APP_FETCH_URL||''}/tt?feed=${id}&route=${route}&origin=${origin}&dest=${dest}&year=${selectedDate.getFullYear()}&month=${selectedDate.getMonth() + 1}&date=${selectedDate.getDate()}`
+            const query = `${process.env.REACT_APP_FETCH_URL||'https://deparch-js.herokuapp.com'}/tt?feed=${id}&route=${route}&origin=${origin}&dest=${dest}&year=${selectedDate.getFullYear()}&month=${selectedDate.getMonth() + 1}&date=${selectedDate.getDate()}`
             console.log(query)
             const response = await fetch(query);
             const jsonData = await response.json();

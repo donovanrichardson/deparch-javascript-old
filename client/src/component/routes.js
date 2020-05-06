@@ -31,8 +31,8 @@ const Routes = (props) =>{
       const getRoutes = async () => {
           try {
               
-              const response = await fetch(`${process.env.REACT_APP_FETCH_URL||''}/routes?feed=${id}`); //in prod the environment variable should be ''
-              console.log(process.env)
+              const response = await fetch(`${process.env.REACT_APP_FETCH_URL||'https://deparch-js.herokuapp.com'}/routes?feed=${id}`); //in prod the environment variable should be ''
+              
               const jsonData = await response.json();
               setRoutes(jsonData);
               console.log(jsonData)
