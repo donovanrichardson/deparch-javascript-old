@@ -14,7 +14,7 @@ const Stops = (props =>{
   const getStops = async () => {
     try {
         
-        const response = await fetch(`http://localhost:5000/stops?feed=${id}&route=${route}`);
+        const response = await fetch(`${process.env.REACT_APP_FETCH_URL||''}/stops?feed=${id}&route=${route}`);
         const jsonData = await response.json();
         setStops(jsonData);
         console.log(jsonData)

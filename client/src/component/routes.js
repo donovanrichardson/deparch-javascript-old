@@ -31,7 +31,8 @@ const Routes = (props) =>{
       const getRoutes = async () => {
           try {
               
-              const response = await fetch(`http://localhost:5000/routes?feed=${id}`);
+              const response = await fetch(`${process.env.REACT_APP_FETCH_URL||''}/routes?feed=${id}`); //in prod the environment variable should be ''
+              console.log(process.env)
               const jsonData = await response.json();
               setRoutes(jsonData);
               console.log(jsonData)

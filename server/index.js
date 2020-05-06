@@ -11,6 +11,7 @@ const env = process.env.DEVPROD;
 // const neatCsv = require('neat-csv');
 const {impfeed , rmfv, getRoutes, getStops, getDests, getTT} = require('./api')
 // const CircularJSON = require('circular-json'); //maybe uninstall
+const path = require('path')
 
 
 
@@ -21,6 +22,7 @@ const {impfeed , rmfv, getRoutes, getStops, getDests, getTT} = require('./api')
 //ooh yes wait a minute mr post man. i did it!! now, im realizing that i can do the gtfs import one-by-one without returning an object. howevur i think returing an object makes it make more sense for me. lol cuties
 
 app.use(cors());
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 app.post('/feed', async (req, res) =>{
     var feedid = req.query.id;
@@ -91,6 +93,21 @@ app.get('/tt', async(req, res) =>{
     })
 })
 
+if (process.env.NODE_ENV === 'production') {
+    // // Serve any static files
+    // app.use(express.static(path.join(__dirname, 'client/build')));
+    // Handle React routing, return all requests to React app
+    app.get('*', function(req, res) {
+      res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    });
+  }
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build/index.html'))  ; //lol res.send(express.static(path.join(__dirname, '../client/build/index.html')))   is incorrect
+ });
+
 app.listen(process.env.PORT || 5000, function () {
     console.log('Server is running')
   })
+
+module.exports = app;

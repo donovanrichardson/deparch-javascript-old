@@ -1,3 +1,14 @@
 node_modules
 **/.DS_Store
 ignorand/
+build/api.js
+build/api.js.map
+build/index.js
+build/index.js.map
+build/localpush.js
+build/localpush.js.map
+build/upload.js
+build/upload.js.map
+build/bin/www.js
+build/bin/www.js.map
+client/.env

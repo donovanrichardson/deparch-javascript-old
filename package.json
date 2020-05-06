@@ -4,7 +4,13 @@
   "description": "One codebase for storing, updating, and querying GTFS feeds, and a web app for generating departure timetables from GTFS.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "devstart": "babel-node ./server/bin/www",
+    "start": "npm run build && node ./build/bin/www",
+    "build": "npm run clean && npm run babel-build",
+    "babel-build": "babel -d ./build ./server -s",
+    "clean": "rm -rf ./build && mkdir build",
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,9 +26,12 @@
   "dependencies": {
     "adm-zip": "^0.4.14",
     "axios": "^0.19.2",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "circular-json": "^0.5.9",
     "cors": "^2.8.5",
     "csv-parser": "^2.3.2",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "knex": "^0.20.13",
     "neat-csv": "^5.2.0",

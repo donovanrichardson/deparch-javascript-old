@@ -50,7 +50,7 @@ const Timetable = (props) =>{
     const getRoutes = async () => {
         try {
             
-            const query = `http://localhost:5000/tt?feed=${id}&route=${route}&origin=${origin}&dest=${dest}&year=${selectedDate.getFullYear()}&month=${selectedDate.getMonth() + 1}&date=${selectedDate.getDate()}`
+            const query = `${process.env.REACT_APP_FETCH_URL||''}/tt?feed=${id}&route=${route}&origin=${origin}&dest=${dest}&year=${selectedDate.getFullYear()}&month=${selectedDate.getMonth() + 1}&date=${selectedDate.getDate()}`
             console.log(query)
             const response = await fetch(query);
             const jsonData = await response.json();
@@ -123,8 +123,8 @@ const Timetable = (props) =>{
           {Object.keys(routes.deps).map(hour=>(
             <Fragment>
             <tr>
-              <td className="hour" style={{backgroundColor: bgcolor[(hour-first)%2], color:text[(hour-first)%2]}}>{hour}</td>
-              <td className="minute" style={{textAlign: 'left', backgroundColor: `${bgcolor[(hour-first)%2]}44`}}>{routes.deps[hour].map(minute=>(`${minute[1]} `))}</td>
+              <td className="hour" style={{backgroundColor: bgcolor[(hour-first)%2], color:text[(hour-first)%2]}}>{hour}</td> {/* creates the hour column for each row; the text and background alternate between white and those determined by gtfs */}
+              <td className="minute" style={{textAlign: 'left', backgroundColor: `${bgcolor[(hour-first)%2]}44`}}>{routes.deps[hour].map(minute=>(`${minute[1]} `))}</td>{/* creates the minute column for each row; the background color is a lighter(more transparent) color than that of the hour column */}
             </tr>
             {shaded = !shaded}
             </Fragment>
