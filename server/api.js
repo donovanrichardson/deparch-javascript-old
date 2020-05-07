@@ -119,7 +119,7 @@ const addToService = async  (table, tr) =>{
         /* await */ 
         if (mod.length > 0){ //not needed for batch insert
             theq = `${knex('service').insert(mod).toString()} on conflict (service_id, feed_version) do nothing`
-            console.log(theq)
+            // console.log(theq)
             return tr.raw(theq)
     }
 /*         mod.forEach(async row =>{
@@ -499,11 +499,13 @@ const localImp = async (feed) =>{
 // impAll()
 // localImp(/* insert feed here */)
 
-//   localImp('septa/262')
+//   localImp("bart/58")
 //   localImp('mta/79')
 //   localImp('mta/86')
 //   localImp('rabbit-transit/383')
 //   localImp('mbta/64')
+//   localImp('septa/262')
+//   localImp('septa/263')
 // impfeed('septa/262')
 
 // localImp("mbta/64") //update feeds
