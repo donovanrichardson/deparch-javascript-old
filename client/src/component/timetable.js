@@ -107,7 +107,7 @@ const Timetable = (props) =>{
           <Link to={`/${params.agency}/stops?route=${route}`}>Back to Origin Selection</Link>
         </li>
         <li>
-          <Link to={`/${params.agency}/stops?route=${route}&dest=${dest}`}>Back to Destination Selection</Link>
+          <Link to={`/${params.agency}/dests?route=${route}&origin=${origin}`}>Back to Destination Selection</Link>
         </li>
       </ul>
           <div className="container">

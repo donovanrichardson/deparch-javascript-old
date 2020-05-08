@@ -487,7 +487,7 @@ const localImp = async (feed) =>{
         console.log(`${imp} <- was imported`)
         return process.hrtime(start)
     }).then(time =>{
-        console.log(`${time[0]}s, ${time[1]/1000000}ms`)
+        console.log(`${time[0]}s, ${time[1]/1000000}ms`) //put this in the regular imp
     }).finally(()=>{
         knex.destroy()
     })
@@ -499,13 +499,14 @@ const localImp = async (feed) =>{
 // impAll()
 // localImp(/* insert feed here */)
 
-//   localImp("bart/58")
+//  // localImp("bart/58")
 //   localImp('mta/79')
 //   localImp('mta/86')
 //   localImp('rabbit-transit/383')
 //   localImp('mbta/64')
 //   localImp('septa/262')
-//   localImp('septa/263')
+// //  localImp('septa/263')
+// impfeed('septa/262')
 // impfeed('septa/262')
 
 // localImp("mbta/64") //update feeds
