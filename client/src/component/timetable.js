@@ -111,7 +111,7 @@ const Timetable = (props) =>{
         </li>
       </ul>
           <div className="container">
-          <table style={{textAlign: 'center'}}>
+          <table style={{margin: '0 auto'}}>
             <tbody>
           <tr><td colspan='2'>
           <div className="card" key = {routes.route.route_id}>
