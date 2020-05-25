@@ -53,13 +53,14 @@ const Routes = (props) =>{
           <Link to="/">Back to Agency Selection</Link>
         </li>
       </ul>
+      <h1 style={{textAlign:"center"}} /* className="instructions" */>Choose Route</h1> 
         <div className="container">
           {routes.map(route =>(
             <div className="card" key = {route.route_id}>
               <a href = {`stops?route=${route.route_id}`}>
               <RouteShort name={{sn:route.route_short_name, ln:route.route_long_name, rc: route.route_color, rtc:route.route_text_color}}/>
             <RouteLong name={{sn:route.route_short_name, ln:route.route_long_name}}/>
-              </a>
+              </a> 
           </div>
           ))}
           

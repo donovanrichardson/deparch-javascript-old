@@ -12,3 +12,4 @@ build/upload.js.map
 build/bin/www.js
 build/bin/www.js.map
 client/.env
+report.*

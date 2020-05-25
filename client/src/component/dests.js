@@ -48,6 +48,7 @@ return(
           <Link to={`/${params.agency}/stops?route=${route}`}>Back to Origin Selection</Link>
         </li>
       </ul>
+      <h1 style={{textAlign:"center"}} /* className="instructions" */>Choose Destination</h1>
 <div className="container">
 {dests.map(stop =>(
   <div className="card" key = {stop.stop_id}>

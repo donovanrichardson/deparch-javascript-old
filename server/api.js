@@ -431,6 +431,8 @@ const impfeed = async (feedId) => {
     }).then(()=>{
         return addToStopTime(gtfs["stop_times.txt"], t)
     }).then(()=>{
+        return knex('stop').transacting(t).update({location_type:'0'}).where(w => w.where({location_type: ''}).orWhereNull('location_type'))
+    }).then(()=>{
         return knex('stop').transacting(t).update({parent_station: knex.ref('stop_id')}).where({location_type:'0'}).where(w => w.where({parent_station: ''}).orWhereNull('parent_station'))
     }).then(()=>{
         return t.raw(`update stop set parent_station = parent.parent_station from stop as parent where stop.parent_station = parent.stop_id and stop.feed_version = parent.feed_version and stop.location_type = '4'`)
@@ -484,7 +486,7 @@ const localImp = async (feed) =>{
     changeKnex()
     start = process.hrtime()
     impfeed(feed).then((imp)=>{
-        console.log(`${imp} <- was imported`)
+        console.log(`${imp} <- was imported`) //imp is undefined?
         return process.hrtime(start)
     }).then(time =>{
         console.log(`${time[0]}s, ${time[1]/1000000}ms`) //put this in the regular imp
@@ -498,16 +500,23 @@ const localImp = async (feed) =>{
 // prodfeeds() //query current feeds
 // impAll()
 // localImp(/* insert feed here */)
+impfeed('mbta/64')
 
-//  // localImp("bart/58")
-//   localImp('mta/79')
+// // localImp("bart/58")
+
+//   localImp('mta/79')    
 //   localImp('mta/86')
 //   localImp('rabbit-transit/383')
-//   localImp('mbta/64')
+// localImp('bi-state-development-agency/381')
+// localImp('sound-transit/44')
+// localImp('king-county-metro/73')
+
 //   localImp('septa/262')
-// //  localImp('septa/263')
-// impfeed('septa/262')
-// impfeed('septa/262')
+
+//   localImp('mbta/64')
+//  localImp('septa/263')
+
+
 
 // localImp("mbta/64") //update feeds
 //\{(.*?)('.*?')(.*?)\},*$ -> localImp($2)

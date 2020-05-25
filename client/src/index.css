@@ -69,3 +69,7 @@ code {
   .hour, .minute{
     font-family: Lucida Console, monospace; 
   }
+
+  /* .instructions {
+    text-align: "center";
+    } */

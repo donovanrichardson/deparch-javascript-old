@@ -38,6 +38,7 @@ return(
           <Link to={`/${params.agency}/routes`}>Back to Route Selection</Link>
         </li>
       </ul>
+      <h1 style={{textAlign:"center"}} /* className="instructions" */>Choose Origin</h1>
       <div className="container">
 {stops.map(stop =>(
   <div className="card" key = {stop.stop_id}>
