@@ -13,7 +13,7 @@ const Routes = (props) =>{
       const RouteShort = ({name}) =>{
         const bgcol = name.rc
         const col = name.rtc
-        const styles = {backgroundColor: `#${bgcol}`, color:`#${col}`}
+        const styles = {backgroundColor: `#${bgcol}`, color:`#${col}`, wordWrap: "break-word"}
         const short = name.sn == "" ? name.ln : name.sn
         // console.log(short)
         var rstd = <h1 style={styles}>{short}</h1>
