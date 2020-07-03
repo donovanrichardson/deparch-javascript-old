@@ -1,5 +1,9 @@
 # Deparch JS 
 
+**Use the web app [here](https://deparch-js.herokuapp.com)**
+
+***Below is a description of the API backing the timetable app.***
+
 A Node.js project for retrieving scheduled departure times for transit using GTFS. This is the same thing that [my earlier Deparch project](https://donovanrichardson.github.io/departures/home.html) does, but with a simplified codebase.
 
 Right now it is just a back end; soon I will create a front end that will generate timetables with this API.
