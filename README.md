@@ -1,6 +1,6 @@
 # Deparch JS 
 
-**Use the web app [here](https://deparch-js.herokuapp.com)**
+** The live app for this project is no longer being supported. You can still look at the source code here. I plan to make an improved version in the coming months.**
 
 ***Below is a description of the API backing the timetable app.***
 
